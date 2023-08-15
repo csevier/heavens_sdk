@@ -2,12 +2,6 @@ from enum import Enum
 from panda3d.core import Vec3
 
 
-class Property:
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-
-
 class EntitySpawnType(Enum):
     WORLDSPAWN = 0
     MERGE_WORLDSPAWN = 1
@@ -17,7 +11,7 @@ class EntitySpawnType(Enum):
 
 class Entity:
     def __init__(self):
-        self.properties = []
+        self.properties = {}
         self.brushes = []
         self.center = Vec3()
         self.spawn_type = EntitySpawnType.WORLDSPAWN

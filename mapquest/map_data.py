@@ -1,12 +1,12 @@
 class TextureData:
-    def __init__(self, name, width, height):
+    def __init__(self, name="", width=0, height=0):
         self.name = name
         self.width = width
         self.height = height
 
 
 class WorldSpawnLayer:
-    def __init__(self, texture_idx, build_visuals):
+    def __init__(self, texture_idx=0, build_visuals=False):
         self.texture_idx = texture_idx
         self.build_visuals = build_visuals
 
@@ -34,7 +34,11 @@ class MapData:
         pass
 
     def register_texture(self, name):
-        pass
+        if name in self.textures:
+            return self.textures.index(name)
+        td = TextureData(name)
+        self.textures.append(td)
+        return len(self.textures) - 1
 
     def set_texture_size(self, name, height, width):
         pass

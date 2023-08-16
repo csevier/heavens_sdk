@@ -1,8 +1,17 @@
 from enum import Enum
+
+
 class Surface:
-    def __init__(self, vertices, indices):
-        self.vertices = vertices
-        self.indices = indices
+    def __init__(self, vertices=None, indices=None):
+        if vertices is None:
+            self.vertices = []
+        else:
+            self.vertices = vertices
+
+        if indices is None:
+            self.indices = []
+        else:
+            self.indices = indices
 
 
 class SurfaceSplitType(Enum):

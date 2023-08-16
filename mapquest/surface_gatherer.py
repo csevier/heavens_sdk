@@ -1,4 +1,5 @@
 from enum import Enum
+from entity import EntitySpawnType
 
 
 class Surface:
@@ -50,7 +51,49 @@ class SurfaceGatherer:
         self.filter_worldspawn_layers = world_spawn_filter
 
     def run(self):
-        pass
+        self.reset_state()
+        index_offset = 0
+        surf_inst = None
+        if self.split_type == SurfaceSplitType.NONE:
+            index_offset = 0
+            surf_inst = self.add_surface()
+
+        for entity_idx, entity_inst, entity_geo_inst in enumerate(zip(self.map_data.get_entities(), self.map_data.entity_geo)):
+            if self.filter_entity(entity_idx):
+                continue
+
+            if self.split_type == SurfaceSplitType.ENTITY:
+                if entity_inst.spawn_type == EntitySpawnType.MERGE_WORLDSPAWN:
+                    self.add_surface()
+                    surf_inst = self.out_surfaces[0]
+                    index_offset = len(surf_inst.vertices)
+                else:
+                    surf_inst = self.add_surface()
+                    index_offset = len(surf_inst.vertices)
+
+            for brush_idx, brush in enumerate(entity_inst.brushes):
+                brush_geo = entity_geo_inst.brushes[brush_idx]
+                if self.filter_brush(entity_idx, brush_idx):
+                    continue
+
+                if self.split_type == SurfaceSplitType.BRUSH:
+                    index_offset = 0
+                    surf_inst = self.add_surface()
+
+                for face_idx, face in enumerate(brush.faces):
+                    face_geo = brush_geo.faces[face_idx]
+                    if self.filter_face(entity_idx, brush_idx, face_idx):
+                        continue
+                    for face_vertex in face_geo.vertices:
+                        if entity_inst.spawn_type == EntitySpawnType.ENTITY or entity_inst.spawn_type == EntitySpawnType.GROUP:
+                            face_vertex = face_vertex.vertex - entity_inst.center
+
+                        surf_inst.vertices.appen(face_vertex)
+
+                    for i in range(0, (len(face_geo.vertices) - 2) * 3):
+                        surf_inst.indices.append(face_geo.indices[i] + index_offset)
+
+                    index_offset += len(face_geo.vertices)
 
     def fetch(self):
         return self.out_surfaces

@@ -83,10 +83,25 @@ class SurfaceGatherer:
         return False
 
     def filter_face(self, entity_idx, brush_idx, face_idx):
-        pass
+        entities = self.map_data.get_entities()
+        face = entities[entity_idx].brushes[brush_idx].faces[face_idx]
+        face_geo = self.map_data.entity_geo[entity_idx].brushes[brush_idx].faces[face_idx]
+
+        if len(face_geo.vertices) < 3:
+            return True
+
+        if self.face_filter_texture_idx != -1 and face.texture_idx == self.face_filter_texture_idx:
+            return True
+
+        if self.texture_filter_idx != -1 and face.texture_idx != self.texture_filter_idx:
+            return True
+
+        return False
 
     def add_surface(self):
-        pass
+        surface = Surface()
+        self.out_surfaces.append(surface)
+        return surface
 
     def reset_state(self):
         self.out_surfaces.clear()

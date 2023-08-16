@@ -82,7 +82,6 @@ class SurfaceGatherer:
 
         return False
 
-
     def filter_face(self, entity_idx, brush_idx, face_idx):
         pass
 

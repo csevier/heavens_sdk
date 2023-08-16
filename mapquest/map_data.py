@@ -34,8 +34,9 @@ class MapData:
         pass
 
     def register_texture(self, name):
-        if name in self.textures:
-            return self.textures.index(name)
+        for index, text in enumerate(self.textures):
+            if text.name == name:
+                return index
         td = TextureData(name)
         self.textures.append(td)
         return len(self.textures) - 1

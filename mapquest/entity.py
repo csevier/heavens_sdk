@@ -10,7 +10,7 @@ class EntitySpawnType(Enum):
 
 
 class Entity:
-    def __init__(self, properties=None, brushes=None, center=Vec3(), spawn_type=EntitySpawnType.WORLDSPAWN):
+    def __init__(self, properties=None, brushes=None, center=None, spawn_type=EntitySpawnType.WORLDSPAWN):
         if properties is None:
             self.properties = {}
         else:
@@ -19,5 +19,8 @@ class Entity:
             self.brushes = []
         else:
             self.brushes = brushes
-        self.center = center
+        if center is None:
+            self.center = Vec3()
+        else:
+            self.center = center
         self.spawn_type = spawn_type

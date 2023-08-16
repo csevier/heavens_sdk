@@ -16,22 +16,30 @@ class MapData:
         self.entities = []
         self.entity_geo = []
         self.textures = []
-        self.world_spawn_layers = []
+        self.worldspawn_layers = []
 
     def reset(self):
-        pass
+        self.entities.clear()
+        self.entity_geo.clear()
+        self.textures.clear()
+        self.worldspawn_layers.clear()
 
     def register_worldspawn_layer(self, name, build_visuals):
-        pass
+        wsl = WorldSpawnLayer()
+        wsl.texture_idx = self.find_texture(name)
+        wsl.build_visuals = build_visuals
 
     def find_worldspawn_layer(self, texture_idx):
-        pass
+        for index, wsl in enumerate(self.worldspawn_layers):
+            if wsl.texture_idx == texture_idx:
+                return index
+        return -1
 
     def get_worldspawn_layer_count(self):
-        pass
+       return len(self.worldspawn_layers)
 
     def get_worldspawn_layers(self):
-        pass
+        return self.worldspawn_layers
 
     def register_texture(self, name):
         for index, text in enumerate(self.textures):
@@ -42,31 +50,43 @@ class MapData:
         return len(self.textures) - 1
 
     def set_texture_size(self, name, height, width):
-        pass
+        for index, text in enumerate(self.textures):
+            if text.name == name:
+                text.width = width
+                text.height = height
 
     def get_texture_count(self):
-        pass
+        return len(self.textures)
 
     def get_textures(self):
-        pass
-
-    def find_texture(self, name):
-        pass
+        return self.textures
 
     def get_texture(self, texture_idx):
-        pass
+        return self.textures[texture_idx]
 
-    def set_spawn_type_by_classname(self, name, spawn_type):
-        pass
+    def find_texture(self, name):
+        for index, text in enumerate(self.textures):
+            if text.name == name:
+                return index
+        return -1
+
+    def set_spawn_type_by_classname(self, key, spawn_type):
+        for entity in self.entities:
+            if len(entity.properties) == 0:
+                continue
+
+            if entity.properties["classname"] == key:
+                entity.spawn_type = spawn_type
 
     def print_entities(self):
-        pass
+        for entity in self.entities:
+            print(entity)
 
     def get_entity_count(self):
-        pass
+        return len(self.entities)
 
     def get_entities(self):
-        pass
+        return self.entities
 
     def get_entity_property(self, entity_idx, key):
-        pass
+        return self.entities[entity_idx].properties[key]

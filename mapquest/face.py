@@ -54,7 +54,7 @@ class FaceUVExtra:
 class Face:
     def __init__(self, plane_points=None,
                  plane_normal=None,
-                 plane_distance=0.0,
+                 plane_dist=0.0,
                  texture_idx=0,
                  is_valve_uv=False,
                  uv_valve=None,
@@ -69,7 +69,7 @@ class Face:
         else:
             self.plane_normal = plane_normal
 
-        self.plane_distance = plane_distance
+        self.plane_dist = plane_dist
         self.texture_idx = texture_idx
         self.is_valve_uv = is_valve_uv
 

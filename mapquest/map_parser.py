@@ -1,5 +1,5 @@
 from map_data import MapData
-from entity import Entity
+from entity import Entity, EntitySpawnType
 from face import Face
 from brush import Brush
 from enum import Enum
@@ -271,6 +271,11 @@ class MapParser:
             self.comment = False
 
     def commit_face(self):
+        v0v1 = self.current_face.plane_points.v1 - self.current_face.plane_points.v0
+        v1v2 = self.current_face.plane_points.v2 - self.current_face.plane_points.v1
+        self.current_face.plane_normal = v1v2.cross(v0v1).normalized()
+        self.current_face.plane_dist = self.current_face.plane_normal.dot(self.current_face.plane_points.v0)
+        self.current_face.is_valve_uv = self.valve_uvs
         self.current_brush.faces.append(self.current_face)
         self.reset_current_face()
 
@@ -279,5 +284,6 @@ class MapParser:
         self.reset_current_brush()
 
     def commmit_entity(self):
+        self.current_entity.spawn_type = EntitySpawnType.ENTITY
         self.map_data.entities.append(self.current_entity)
         self.reset_current_entity()

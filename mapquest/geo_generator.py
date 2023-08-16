@@ -1,6 +1,7 @@
+from panda3d.core import Vec3, Mat4
 class GeoGenerator:
-    def __init__(self):
-        pass
+    def __init__(self, map_data):
+        self.map_data = map_data
 
     def run(self):
         pass

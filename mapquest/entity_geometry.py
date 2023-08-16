@@ -16,11 +16,24 @@ class VertexTangent:
 
 
 class FaceVertex:
-    def __init__(self, vertex=Vec3(), normal=Vec3(), uv=VertexUV, tangent=VertexTangent()):
-        self.vertex = vertex
-        self.normal = normal
-        self.uv = uv
-        self.tangent = tangent
+    def __init__(self, vertex=None, normal=None, uv=None, tangent=None):
+        if vertex is None:
+            self.vertex = Vec3()
+        else:
+            self.vertex = vertex
+        if normal is None:
+            self.normal = Vec3()
+        else:
+            self.normal = normal
+
+        if uv is None:
+            self.uv = VertexUV()
+        else:
+            self.uv = uv
+        if tangent is None:
+            self.tangent = VertexTangent()
+        else:
+            self.tangent = tangent
 
 
 class FaceGeometry:

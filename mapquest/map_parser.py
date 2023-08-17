@@ -1,7 +1,7 @@
-from map_data import MapData
-from entity import Entity, EntitySpawnType
-from face import Face
-from brush import Brush
+from .map_data import MapData
+from .entity import Entity, EntitySpawnType
+from .face import Face
+from .brush import Brush
 from enum import Enum
 
 

@@ -1,5 +1,5 @@
 from panda3d.core import Vec3, Mat4, Quat
-from entity_geometry import VertexTangent, VertexUV, FaceVertex, EntityGeometry, BrushGeometry, FaceGeometry
+from .entity_geometry import VertexTangent, VertexUV, FaceVertex, EntityGeometry, BrushGeometry, FaceGeometry
 import math
 import functools
 

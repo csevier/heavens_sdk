@@ -1,13 +1,23 @@
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import (WindowProperties,
-                          loadPrcFileData)
+                          loadPrcFileData,
+                          GeomVertexFormat,
+                          GeomVertexData,
+                          Geom,
+                          GeomVertexWriter,
+                          GeomTriangles,
+                          GeomNode)
 
 from direct.directtools.DirectGeometry import LineNodePath
 from fps_character import FPSCharacter
 from sprite import Sprite
 import sys
+from mapquest.map_parser import MapParser
+from mapquest.geo_generator import  GeoGenerator
 loadPrcFileData("", "show-frame-rate-meter #t")
 loadPrcFileData("", "sync-video #t")
+# loadPrcFileData("", "want-directtools #t")
+# loadPrcFileData("", "want-tk #t")
 
 
 class Heaven(ShowBase):
@@ -43,6 +53,42 @@ class Heaven(ShowBase):
         self.global_z = LineNodePath(name="global_z", parent=self.render, thickness=1.0, colorVec=(0, 0, 1, 1))
         self.global_z.drawLines([z])
         self.global_z.create()
+        self.load_map("qodot_test.map")
+
+    def load_map(self, map_name):
+        mp = MapParser()
+        mp.parser_load(f"./mapquest/test_maps/{map_name}")
+        mp.map_data.load_texture_data()
+        geo_gen = GeoGenerator(mp.map_data)
+        geo_gen.run()
+        print("loaded starting panda conversion")
+        for entity_idx, entity_geo in enumerate(mp.map_data.entity_geo):
+            for brush_idx, brush in enumerate(entity_geo.brushes):
+                for face_idx, face in enumerate(brush.faces):
+                    vdata = GeomVertexData('name', GeomVertexFormat.getV3n3t2(), Geom.UHStatic)
+                    vertex = GeomVertexWriter(vdata, 'vertex')
+                    normal = GeomVertexWriter(vdata, 'normal')
+                    texcoord = GeomVertexWriter(vdata, 'texcoord')
+                    prim = GeomTriangles(Geom.UHStatic)
+                    for vert in face.vertices:
+                        vertex.addData3(vert.vertex.x, vert.vertex.y, vert.vertex.z)
+                        normal.addData3(vert.normal.x, vert.normal.y, vert.normal.z)
+                        texcoord.addData2(vert.uv.u, vert.uv.v)
+                    for indice in face.indices:
+                        prim.addVertex(indice)
+
+                    prim.closePrimitive()
+                    geom = Geom(vdata)
+                    geom.addPrimitive(prim)
+                    node = GeomNode('brush_face')
+                    node.addGeom(geom)
+                    texture_id = mp.map_data.get_entities()[entity_idx].brushes[brush_idx].faces[face_idx].texture_idx
+                    texture = mp.map_data.get_texture(texture_id)
+                    np = base.render.attachNewNode(node)
+                    # set texture
+                    np.setTexture(texture.p3d_texture, 1)
+                    np.setScale(0.01)
+                    np.setTwoSided(True)
 
 
 Heaven().run()

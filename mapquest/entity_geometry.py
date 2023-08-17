@@ -57,7 +57,7 @@ class BrushGeometry:
 
 
 class EntityGeometry:
-    def __init__(self, brushes):
+    def __init__(self, brushes=None):
         if brushes is None:
             self.brushes = []
         else:

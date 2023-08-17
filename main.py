@@ -55,7 +55,7 @@ class Heaven(ShowBase):
         self.global_z = LineNodePath(name="global_z", parent=self.render, thickness=1.0, colorVec=(0, 0, 1, 1))
         self.global_z.drawLines([z])
         self.global_z.create()
-        self.load_map("messed.map")
+        self.load_map("test_level9.map")
 
     def load_map(self, map_name):
         mp = MapParser()
@@ -90,7 +90,7 @@ class Heaven(ShowBase):
                     # set texture
                     np.setTexture(texture.p3d_texture, 1)
                     np.setScale(0.01)
-                    np.setTwoSided(True)
+                    #np.setTwoSided(True)
 
 
 Heaven().run()

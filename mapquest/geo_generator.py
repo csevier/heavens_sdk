@@ -38,9 +38,9 @@ class GeoGenerator:
         rhs_angle = math.atan2(rhs_pv, rhs_pu)
 
         if lhs_angle < rhs_angle:
-            return -1
-        elif lhs_angle > rhs_angle:
             return 1
+        elif lhs_angle > rhs_angle:
+            return -1
 
         return 0
 

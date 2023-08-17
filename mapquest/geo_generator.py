@@ -1,6 +1,7 @@
 from panda3d.core import Vec3, Mat4, Quat
 from entity_geometry import VertexTangent, VertexUV, FaceVertex, EntityGeometry, BrushGeometry, FaceGeometry
 import math
+import functools
 
 
 class GeoGenerator:
@@ -25,11 +26,11 @@ class GeoGenerator:
         u = self.wind_face_basis.normalized()
         v = u.cross(self.wind_face_normal).normalized()
 
-        local_lhs = lhs_in - self.wind_face_center
+        local_lhs = lhs_in.vertex - self.wind_face_center
         lhs_pu = local_lhs.dot(u)
         lhs_pv = local_lhs.dot(v)
 
-        local_rhs = rhs_in - self.wind_face_center
+        local_rhs = rhs_in.vertex - self.wind_face_center
         rhs_pu = local_rhs.dot(u)
         rhs_pv = local_rhs.dot(v)
 
@@ -66,9 +67,9 @@ class GeoGenerator:
                 self.generate_brush_vertices(e, b)
                 brush_geo_inst = self.map_data.entity_geo[e].brushes[b]
                 for f, face in enumerate(brush_inst.faces):
-                    face_geo_inst = brush_geo_inst[f]
+                    face_geo_inst = brush_geo_inst.faces[f]
                     for v, vertex in enumerate(face_geo_inst.vertices):
-                        brush_inst.center = brush_inst.center + vertex
+                        brush_inst.center = brush_inst.center + vertex.vertex
                         vert_count += 1
 
                 if vert_count > 0:
@@ -93,15 +94,16 @@ class GeoGenerator:
                     self.wind_brush_idx = b
                     self.wind_face_idx = f
 
-                    self.wind_face_basis = face_geo_inst.vertices[1] - face_geo_inst.vertices[0]
+                    self.wind_face_basis = face_geo_inst.vertices[1].vertex - face_geo_inst.vertices[0].vertex
                     self.wind_face_center = Vec3()
                     self.wind_face_normal = face_inst.plane_normal
 
                     for v, vertex in enumerate(face_geo_inst.vertices):
-                        self.wind_face_center = self.wind_face_center + vertex
+                        self.wind_face_center = self.wind_face_center + vertex.vertex
 
                     self.wind_face_center = self.wind_face_center / len(face_geo_inst.vertices)
-                    face_geo_inst.vertices.sort(key=self.sort_vertices_by_winding)
+                    cmp = functools.cmp_to_key(self.sort_vertices_by_winding)
+                    face_geo_inst.vertices.sort(key=cmp)
                     self.wind_entity_idx = 0
 
         for e, entity_inst in enumerate(self.map_data.get_entities()):
@@ -115,10 +117,9 @@ class GeoGenerator:
 
                     face_geo_inst.indices = []
                     for i in range(len(face_geo_inst.vertices) - 2): # this algo is fucked, fixed this if you get here.
-
-                        face_geo_inst.indices[len(face_geo_inst.indices)] = 0
-                        face_geo_inst.indices[len(face_geo_inst.indices) + 1] = i + 1
-                        face_geo_inst.indices[len(face_geo_inst.indices) + 2] = i + 2
+                        face_geo_inst.indices.append(0)
+                        face_geo_inst.indices.append(i + 1)
+                        face_geo_inst.indices.append(i + 2)
 
     def generate_brush_vertices(self, entity_idx, brush_idx):
         entity_inst = self.map_data.get_entities()[entity_idx]
@@ -127,8 +128,8 @@ class GeoGenerator:
         for f0, face_inst0 in enumerate(brush_inst.faces):
             for f1, face_inst1 in enumerate(brush_inst.faces):
                 for f2, face_inst2 in enumerate(brush_inst.faces):
-                    vertex = Vec3()
-                    if self.intersect_faces(face_inst0, face_inst1, face_inst2, vertex):
+                    is_intersecting, vertex = self.intersect_faces(face_inst0, face_inst1, face_inst2)
+                    if is_intersecting:
                         if self.vertex_in_hull(brush_inst.faces, vertex):
                             face_inst = face_inst0
                             face_geo = self.map_data.entity_geo[entity_idx].brushes[brush_idx].faces[f0]
@@ -171,7 +172,7 @@ class GeoGenerator:
                             duplicate_index = -1
 
                             for v, comp_vertex in enumerate(face_geo.vertices):
-                                if (vertex - comp_vertex).length() < self.EPSILON:
+                                if (vertex - comp_vertex.vertex).length() < self.EPSILON:
                                     unique_vertex = False
                                     duplicate_index = v
                                     break
@@ -181,7 +182,8 @@ class GeoGenerator:
                             elif phong:
                                 face_geo.vertices.append(face_geo.vertices[duplicate_index].normal + normal)
 
-    def intersect_faces(self, f0, f1, f2, o_vertex):
+    def intersect_faces(self, f0, f1, f2):
+        o_vertex = Vec3()
         normal0 = f0.plane_normal
         normal1 = f1.plane_normal
         normal2 = f2.plane_normal
@@ -189,7 +191,7 @@ class GeoGenerator:
         denom = normal0.cross(normal1).dot(normal2)
 
         if denom < self.EPSILON:
-            return False
+            return False, o_vertex
 
         a = normal1.cross(normal2) * f0.plane_dist
         b = normal2.cross(normal0) * f1.plane_dist
@@ -198,7 +200,7 @@ class GeoGenerator:
         e = d + c
         o_vertex = e / denom
 
-        return True
+        return True, o_vertex
 
     def vertex_in_hull(self, faces, vertex):
         for face in faces:

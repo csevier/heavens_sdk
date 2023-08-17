@@ -123,15 +123,6 @@ class GeoGenerator:
 
         self.map_data.entity_geo = entity_geo
 
-
-
-
-
-
-
-
-
-
     def generate_brush_vertices(self, entity_idx, brush_idx):
         entity_inst = self.map_data.get_entities()[entity_idx]
         brush_inst = entity_inst.brushes[brush_idx]

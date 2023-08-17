@@ -205,8 +205,11 @@ class GeoGenerator:
     def vertex_in_hull(self, faces, vertex):
         for face in faces:
             proj = face.plane_normal.dot(vertex)
-
-            if proj > face.plane_dist and abs(face.plane_dist - proj) > self.EPSILON:
+            a = proj > face.plane_dist
+            c = abs(face.plane_dist - proj)
+            # b = c > self.EPSILON
+            b = c > 1
+            if a and b:
                 return False
 
         return True

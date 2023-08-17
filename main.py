@@ -6,6 +6,7 @@ from panda3d.core import (WindowProperties,
                           Geom,
                           GeomVertexWriter,
                           GeomTriangles,
+                          GeomTrifans,
                           GeomNode,
                           TextureStage,
                           Texture)
@@ -55,7 +56,7 @@ class Heaven(ShowBase):
         self.global_z = LineNodePath(name="global_z", parent=self.render, thickness=1.0, colorVec=(0, 0, 1, 1))
         self.global_z.drawLines([z])
         self.global_z.create()
-        self.load_map("test_level9.map")
+        self.load_map("messed.map")
 
     def load_map(self, map_name):
         mp = MapParser()

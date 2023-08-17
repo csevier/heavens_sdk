@@ -1,8 +1,24 @@
+
+from panda3d.core import SamplerState, PNMImage, Texture
+
+
 class TextureData:
     def __init__(self, name="", width=0, height=0):
         self.name = name
         self.width = width
         self.height = height
+        self.p3d_texture = None
+
+    def load(self, path):
+        #loader = Loader()
+        full = f"{path}/{self.name}.png"
+        image = PNMImage()
+        image.read(full)
+        self.p3d_texture = Texture(self.name)
+        self.p3d_texture.load(image)
+        self.width = image.size.x
+        self.height = image.size.y
+
 
 
 class WorldSpawnLayer:
@@ -89,4 +105,12 @@ class MapData:
         return self.entities
 
     def get_entity_property(self, entity_idx, key):
-        return self.entities[entity_idx].properties[key]
+        return self.entities[entity_idx].properties.get(key)
+
+    def load_texture_data(self):
+        if len(self.entities) > 0:
+            path = self.entities[0].properties.get("_tb_textures")
+            wad = self.entities[0].properties.get("wad") # if i ever want was support but likely no.
+            if path:
+                for texture in self.textures:
+                    texture.load(path)

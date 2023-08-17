@@ -1,5 +1,5 @@
 from panda3d.core import Vec3, Mat4, Quat
-from entity_geometry import VertexTangent, VertexUV
+from entity_geometry import VertexTangent, VertexUV, FaceVertex, EntityGeometry, BrushGeometry, FaceGeometry
 import math
 
 
@@ -44,10 +44,154 @@ class GeoGenerator:
         return 0
 
     def run(self):
-        pass
+        entity_geo = []
+        for e, ent_inst in enumerate(self.map_data.get_entities()):
+            entity_geo_inst = EntityGeometry()
+            entity_geo.append(entity_geo_inst)
+
+            entity_geo_inst.brushes = []
+            for b, brush_inst in enumerate(ent_inst.brushes):
+                brush_geo_instance = BrushGeometry()
+                entity_geo_inst.brushes.append(brush_geo_instance)
+                brush_geo_instance.faces = []
+                for f, face in enumerate(brush_inst.faces):
+                    face_geo_inst = FaceGeometry()
+                    brush_geo_instance.faces.append(face_geo_inst)
+
+        for e, ent_inst in enumerate(self.map_data.get_entities()):
+            ent_inst.center = Vec3()
+            for b, brush_inst in enumerate(ent_inst.brushes):
+                brush_inst.center = Vec3()
+                vert_count = 0
+
+                self.generate_brush_vertices(e, b)
+                brush_geo_inst = entity_geo[e].brushes[b]
+                for f, face in enumerate(brush_inst.faces):
+                    face_geo_inst = brush_geo_inst[f]
+                    for v, vertex in enumerate(face_geo_inst.vertices):
+                        brush_inst.center = brush_inst.center + vertex
+                        vert_count += 1
+
+                if vert_count > 0:
+                    brush_inst.center = brush_inst.center / vert_count
+
+                ent_inst.center = ent_inst.center + brush_inst.center
+
+            if len(ent_inst.brushes) > 0:
+                ent_inst.center = ent_inst.center / len(ent_inst.brushes)
+
+        for e, entity_inst in enumerate(self.map_data.get_entities()):
+            entity_geo_inst = entity_geo[e]
+            for b, brush_inst in enumerate(entity_inst.brushes):
+                brush_geo_inst = entity_geo_inst.brushes[b]
+                for f, face_inst in enumerate(brush_inst.faces):
+                    face_geo_inst = brush_geo_inst.faces[f]
+
+                    if len(face_geo_inst.vertices) < 3:
+                        continue
+
+                    self.wind_entity_idx = e
+                    self.wind_brush_idx = b
+                    self.wind_face_idx = f
+
+                    self.wind_face_basis = face_geo_inst.vertices[1] - face_geo_inst.vertices[0]
+                    self.wind_face_center = Vec3()
+                    self.wind_face_normal = face_inst.plane_normal
+
+                    for v, vertex in enumerate(face_geo_inst.vertices):
+                        self.wind_face_center = self.wind_face_center + vertex
+
+                    self.wind_face_center = self.wind_face_center / len(face_geo_inst.vertices)
+                    face_geo_inst.vertices.sort(key=self.sort_vertices_by_winding)
+                    self.wind_entity_idx = 0
+
+        for e, entity_inst in enumerate(self.map_data.get_entities()):
+            entity_geo_inst = entity_geo[e]
+            for b, brush_inst in enumerate(entity_inst.brushes):
+                brush_geo_inst = entity_geo_inst.brushes[b]
+                for f, face in enumerate(brush_inst.faces):
+                    face_geo_inst = brush_geo_inst.faces[f]
+                    if len(face_geo_inst.vertices) < 3:
+                        continue
+
+                    face_geo_inst.indices = []
+                    for i in range(len(face_geo_inst.vertices) - 2): # this algo is fucked, fixed this if you get here.
+
+                        face_geo_inst.indices[len(face_geo_inst.indices)] = 0
+                        face_geo_inst.indices[len(face_geo_inst.indices) + 1] = i + 1
+                        face_geo_inst.indices[len(face_geo_inst.indices) + 2] = i + 2
+
+        self.map_data.entity_geo = entity_geo
+
+
+
+
+
+
+
+
+
 
     def generate_brush_vertices(self, entity_idx, brush_idx):
-        pass
+        entity_inst = self.map_data.get_entities()[entity_idx]
+        brush_inst = entity_inst.brushes[brush_idx]
+
+        for f0, face_inst0 in enumerate(brush_inst.faces):
+            for f1, face_inst1 in enumerate(brush_inst.faces):
+                for f2, face_inst2 in enumerate(brush_inst.faces):
+                    vertex = Vec3()
+                    if self.intersect_faces(face_inst0, face_inst1, face_inst2, vertex):
+                        if self.vertex_in_hull(brush_inst.faces, len(brush_inst.faces), vertex):
+                            face_inst = face_inst0
+                            face_geo = self.map_data.entity_geo[entity_idx].brushes[brush_idx].faces[f0]
+
+                            normal = Vec3()
+                            phong_property = self.map_data.get_entity_property(entity_idx, "_phong")
+                            phong = phong_property is not None and phong_property == "1"
+
+                            if phong:
+                                phong_angle_property = self.map_data.get_entity_property(entity_idx, "_phong_angle")
+                                if phong_angle_property:
+                                    threshold = math.cos((float(phong_angle_property) + 0.01) * 0.0174533)
+                                    normal = face_inst0.plane_normal
+                                    if face_inst0.plane_normal.dot(face_inst1.plane_normal) > threshold:
+                                        normal = normal + face_inst1
+                                    if face_inst0.plane_normal.dot(face_inst2.plane_normal) > threshold:
+                                        normal = normal + face_inst2
+
+                                    normal = normal.normalized()
+                                else:
+                                    normal = face_inst0.plane_normal + (face_inst1.plane_normal + face_inst2.plane_normal)
+                                    normal = normal.normalized()
+                            else:
+                                normal = face_inst.plane_normal
+
+                            texture = self.map_data.get_texture(face_inst.texture_idx)
+                            uv = VertexUV()
+                            if face_inst.is_valve_uv:
+                                uv = self.get_valve_uv(vertex, face_inst, texture.width, texture.height)
+                            else:
+                                uv = self.get_standard_uv(vertex, face_inst, texture.width, texture.height)
+
+                            tangent = VertexTangent()
+                            if face_inst.is_valve_uv:
+                                tangent = self.get_valve_tangent(face_inst)
+                            else:
+                                tangent = self.get_standard_tangent(face_inst)
+
+                            unique_vertex = True
+                            duplicate_index = -1
+
+                            for v, comp_vertex in enumerate(face_geo.vertices):
+                                if (vertex - comp_vertex).length() < self.EPSILON:
+                                    unique_vertex = False
+                                    duplicate_index = v
+                                    break
+
+                            if unique_vertex:
+                                face_geo.vertices.append(FaceVertex(vertex=vertex, normal=normal, uv=uv, tangent=tangent))
+                            elif phong:
+                                face_geo.vertices.append(face_geo.vertices[duplicate_index].normal + normal)
 
     def intersect_faces(self, f0, f1, f2, o_vertex):
         normal0 = f0.plane_normal

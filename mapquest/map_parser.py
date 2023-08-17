@@ -80,37 +80,37 @@ class MapParser:
                    self.buffer += c
 
     def set_scope(self, scope):
-        match scope:
-            case ParseScope.FILE:
-                print("Switching to FILE scope.")
-            case ParseScope.ENTITY:
-                print("Switching to ENTITY scope.", self.entity_idx)
-            case ParseScope.PROPERTY_VALUE:
-                print("Switching to PROPERTY_VALUE scope.")
-            case ParseScope.BRUSH:
-                print("Switching to BRUSH scope.", self.brush_idx)
-            case ParseScope.PLANE_0:
-                print("Switching to PLANE_0 scope.", self.face_idx)
-            case ParseScope.PLANE_1:
-                print("Switching to PLANE_1 scope.", self.face_idx)
-            case ParseScope.PLANE_2:
-                print("Switching to PLANE_2 scope.", self.face_idx)
-            case ParseScope.TEXTURE:
-                print("Switching to TEXTURE scope.")
-            case ParseScope.U:
-                print("Switching to U scope.")
-            case ParseScope.V:
-                print("Switching to V scope.")
-            case ParseScope.VALVE_U:
-                print("Switching to VALVE_U scope.")
-            case ParseScope.VALVE_V:
-                print("Switching to VALVE_V scope.")
-            case ParseScope.ROT:
-                print("Switching to ROT scope.")
-            case ParseScope.U_SCALE:
-                print("Switching to U_SCALE scope.")
-            case ParseScope.V_SCALE:
-                print("Switching to V_SCALE scope.")
+        # match scope:
+        #     case ParseScope.FILE:
+        #         print("Switching to FILE scope.")
+        #     case ParseScope.ENTITY:
+        #         print("Switching to ENTITY scope.", self.entity_idx)
+        #     case ParseScope.PROPERTY_VALUE:
+        #         print("Switching to PROPERTY_VALUE scope.")
+        #     case ParseScope.BRUSH:
+        #         print("Switching to BRUSH scope.", self.brush_idx)
+        #     case ParseScope.PLANE_0:
+        #         print("Switching to PLANE_0 scope.", self.face_idx)
+        #     case ParseScope.PLANE_1:
+        #         print("Switching to PLANE_1 scope.", self.face_idx)
+        #     case ParseScope.PLANE_2:
+        #         print("Switching to PLANE_2 scope.", self.face_idx)
+        #     case ParseScope.TEXTURE:
+        #         print("Switching to TEXTURE scope.")
+        #     case ParseScope.U:
+        #         print("Switching to U scope.")
+        #     case ParseScope.V:
+        #         print("Switching to V scope.")
+        #     case ParseScope.VALVE_U:
+        #         print("Switching to VALVE_U scope.")
+        #     case ParseScope.VALVE_V:
+        #         print("Switching to VALVE_V scope.")
+        #     case ParseScope.ROT:
+        #         print("Switching to ROT scope.")
+        #     case ParseScope.U_SCALE:
+        #         print("Switching to U_SCALE scope.")
+        #     case ParseScope.V_SCALE:
+        #         print("Switching to V_SCALE scope.")
 
         self.scope = scope
 

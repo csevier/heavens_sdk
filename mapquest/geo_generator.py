@@ -44,10 +44,9 @@ class GeoGenerator:
         return 0
 
     def run(self):
-        entity_geo = []
         for e, ent_inst in enumerate(self.map_data.get_entities()):
             entity_geo_inst = EntityGeometry()
-            entity_geo.append(entity_geo_inst)
+            self.map_data.entity_geo.append(entity_geo_inst)
 
             entity_geo_inst.brushes = []
             for b, brush_inst in enumerate(ent_inst.brushes):
@@ -65,7 +64,7 @@ class GeoGenerator:
                 vert_count = 0
 
                 self.generate_brush_vertices(e, b)
-                brush_geo_inst = entity_geo[e].brushes[b]
+                brush_geo_inst = self.map_data.entity_geo[e].brushes[b]
                 for f, face in enumerate(brush_inst.faces):
                     face_geo_inst = brush_geo_inst[f]
                     for v, vertex in enumerate(face_geo_inst.vertices):
@@ -81,7 +80,7 @@ class GeoGenerator:
                 ent_inst.center = ent_inst.center / len(ent_inst.brushes)
 
         for e, entity_inst in enumerate(self.map_data.get_entities()):
-            entity_geo_inst = entity_geo[e]
+            entity_geo_inst = self.map_data.entity_geo[e]
             for b, brush_inst in enumerate(entity_inst.brushes):
                 brush_geo_inst = entity_geo_inst.brushes[b]
                 for f, face_inst in enumerate(brush_inst.faces):
@@ -106,7 +105,7 @@ class GeoGenerator:
                     self.wind_entity_idx = 0
 
         for e, entity_inst in enumerate(self.map_data.get_entities()):
-            entity_geo_inst = entity_geo[e]
+            entity_geo_inst = self.map_data.entity_geo[e]
             for b, brush_inst in enumerate(entity_inst.brushes):
                 brush_geo_inst = entity_geo_inst.brushes[b]
                 for f, face in enumerate(brush_inst.faces):
@@ -121,8 +120,6 @@ class GeoGenerator:
                         face_geo_inst.indices[len(face_geo_inst.indices) + 1] = i + 1
                         face_geo_inst.indices[len(face_geo_inst.indices) + 2] = i + 2
 
-        self.map_data.entity_geo = entity_geo
-
     def generate_brush_vertices(self, entity_idx, brush_idx):
         entity_inst = self.map_data.get_entities()[entity_idx]
         brush_inst = entity_inst.brushes[brush_idx]
@@ -132,7 +129,7 @@ class GeoGenerator:
                 for f2, face_inst2 in enumerate(brush_inst.faces):
                     vertex = Vec3()
                     if self.intersect_faces(face_inst0, face_inst1, face_inst2, vertex):
-                        if self.vertex_in_hull(brush_inst.faces, len(brush_inst.faces), vertex):
+                        if self.vertex_in_hull(brush_inst.faces, vertex):
                             face_inst = face_inst0
                             face_geo = self.map_data.entity_geo[entity_idx].brushes[brush_idx].faces[f0]
 

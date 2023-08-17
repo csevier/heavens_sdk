@@ -222,7 +222,7 @@ class GeoGenerator:
             uv_out = VertexUV(vertex.x, -vertex.y)
         elif dr >= du and dr >= df:
             uv_out = VertexUV(vertex.x, -vertex.z)
-        elif df >= du and df >=dr:
+        elif df >= du and df >= dr:
             uv_out = VertexUV(vertex.y, -vertex.z)
 
         angle = math.radians(face.uv_extra.rot)
@@ -237,8 +237,9 @@ class GeoGenerator:
         uv_out.u /= face.uv_extra.scale_x
         uv_out.v /= face.uv_extra.scale_y
 
-        uv_out.u = face.uv_standard.u / texture_width
-        uv_out.v = face.uv_standard.v / texture_height
+        uv_out.u += face.uv_standard.u / texture_width
+        uv_out.v += face.uv_standard.v / texture_height
+        uv_out.v *= -1
 
         return uv_out
 

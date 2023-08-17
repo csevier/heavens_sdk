@@ -10,7 +10,6 @@ class TextureData:
         self.p3d_texture = None
 
     def load(self, path):
-        #loader = Loader()
         full = f"{path}/{self.name}.png"
         image = PNMImage()
         image.read(full)

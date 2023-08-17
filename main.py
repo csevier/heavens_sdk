@@ -6,7 +6,9 @@ from panda3d.core import (WindowProperties,
                           Geom,
                           GeomVertexWriter,
                           GeomTriangles,
-                          GeomNode)
+                          GeomNode,
+                          TextureStage,
+                          Texture)
 
 from direct.directtools.DirectGeometry import LineNodePath
 from fps_character import FPSCharacter
@@ -53,7 +55,7 @@ class Heaven(ShowBase):
         self.global_z = LineNodePath(name="global_z", parent=self.render, thickness=1.0, colorVec=(0, 0, 1, 1))
         self.global_z.drawLines([z])
         self.global_z.create()
-        self.load_map("qodot_test.map")
+        self.load_map("messed.map")
 
     def load_map(self, map_name):
         mp = MapParser()
